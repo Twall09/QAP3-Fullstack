@@ -70,7 +70,7 @@ app.post("/login", async (request, response) => {
   const user = USERS.find((u) => u.email === email);
   if (!user) {
     return response.render("login", {
-      errorMessage: "Invalid email or password",
+      errorMessage: "*Invalid email or password. Make sure you are signed up!*",
     });
   }
 
@@ -81,13 +81,13 @@ app.post("/login", async (request, response) => {
     });
   }
 
-  request.session.user = {
-    id: user.id,
-    username: user.username,
-    email: user.email,
-    role: user.role,
-  };
-  response.redirect("/landing");
+  request.session.user = user;
+
+  if (user.role === "admin") {
+    return response.redirect("/admin-dashboard");
+  } else {
+    return response.redirect("/landing");
+  }
 });
 
 // GET /signup - Renders signup form
@@ -97,7 +97,7 @@ app.get("/signup", (request, response) => {
 
 // POST /signup - Allows a user to signup
 app.post("/signup", async (request, response) => {
-  const { email, username, password } = request.body;
+  const { email, username, password, role } = request.body;
 
   // Check if email is already registered
   if (USERS.some((user) => user.email === email)) {
@@ -106,6 +106,8 @@ app.post("/signup", async (request, response) => {
       .render("signup", { errorMessage: "Email taken." });
   }
 
+  const userRole = role === "admin" ? "admin" : "user";
+
   try {
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     USERS.push({
@@ -113,9 +115,18 @@ app.post("/signup", async (request, response) => {
       username,
       email,
       password: hashedPassword,
-      role: "user", // Default role is user
+      role: userRole, // Default role is user or if admin you should be able to see are people
     });
-    response.redirect("/login");
+
+    USERS.push(newUser);
+
+    if (userRole === "admin") {
+      // If the user is an admin, redirect to the admin dashboard
+      return response.redirect("/admin-dashboard");
+    } else {
+      // If the user is a regular user, redirect to the landing page
+      return response.redirect("/landing");
+    }
   } catch (error) {
     console.error("Error during registration:", error);
     response.status(500).render("signup", {
@@ -133,16 +144,20 @@ app.get("/", (request, response) => {
 });
 
 // GET /landing - Shows a welcome page for users, shows the names of all users if an admin
-app.get("/landing", authenticateUser, (request, response) => {
-  const user = request.session.user;
-
-  if (user.role === "admin") {
-    response.render("landing", { user, users: USERS });
-  } else {
-    response.render("landing", { user, users: [] });
+app.get("/landing", (request, response) => {
+  if (!request.session.user) {
+    return response.redirect("/login");
   }
+
+  response.render("landing", { user: request.session.user });
 });
 
+// GET /admin-dashboard - For admins
+app.get("/admin-dashboard", authenticateAdmin, (request, response) => {
+  response.render("admin", { user: request.session.user, users: USERS });
+});
+
+// logout
 app.post("/logout", authenticateUser, (request, response) => {
   request.session.destroy((error) => {
     if (error) {

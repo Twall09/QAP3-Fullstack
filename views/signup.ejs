@@ -1,5 +1,6 @@
 <%- include('partials/header', { title: "Sign Up" }) %>
 <h1>Sign Up</h1>
+
 <form action="/signup" method="POST">
   <div class="form-input-container">
     <label for="email">Email:</label>
@@ -13,7 +14,15 @@
     <label for="password">Password:</label>
     <input type="password" name="password" id="password" required />
   </div>
-  <button type="submit">Sign Up</button>
+  <div class="form-input-container">
+    <label for="role">Role:</label>
+    <select name="role" id="role" required>
+      <option value="user" selected>User</option>
+      <option value="admin">Admin</option>
+    </select>
+  </div>
+
+  <center><button type="submit">Sign Up</button></center>
 </form>
 <p><a href="/">Go back</a></p>
 <%- include('partials/footer') %>

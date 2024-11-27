@@ -1,0 +1,36 @@
+<%- include('partials/header', { title: "Admin Dashboard" }) %>
+
+<div class="admin-dashboard">
+  <h1>Welcome to the Admin Page, <%= user.username %>!</h1>
+
+  <!-- created a table to display the users -->
+  <h2>All Registered Users:</h2>
+  <% if (users && users.length > 0) { %>
+  <table class="user-table">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Role</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% users.forEach(u => { %>
+      <tr>
+        <td><%= u.username %></td>
+        <td><%= u.email %></td>
+        <td><%= u.role %></td>
+      </tr>
+      <% }); %>
+    </tbody>
+  </table>
+  <% } else { %>
+  <p>No users registered yet.</p>
+  <% } %>
+
+  <form action="/logout" method="POST">
+    <button type="submit">Logout</button>
+  </form>
+</div>
+
+<%- include('partials/footer') %>

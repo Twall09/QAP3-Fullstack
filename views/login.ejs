@@ -1,5 +1,10 @@
 <%- include('partials/header', { title: "Login" }) %>
 <h1>Login</h1>
+
+<% if (errorMessage) { %>
+<p class="error-message"><%= errorMessage %></p>
+<% } %>
+
 <form action="/login" method="POST">
   <div class="form-input-container">
     <label for="email">Email:</label>
@@ -9,7 +14,9 @@
     <label for="password">Password:</label>
     <input type="password" name="password" id="password" required />
   </div>
-  <button type="submit">Login</button>
+
+  <center><button type="submit">Login</button></center>
 </form>
 <p><a href="/">Go back</a></p>
+
 <%- include('partials/footer') %>
